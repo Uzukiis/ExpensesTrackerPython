@@ -1,7 +1,27 @@
 from customtkinter import *
 from PIL import Image
 import os
+import fonts
+import tkinter
 
+app = CTk()
+app.geometry('1200x800')
+app.title('Expenses Tracker')
+app.resizable(False, False)
+
+login_frame = CTkFrame(app)
+main_frame = CTkFrame(app)
+
+app.columnconfigure(0, weight=1)
+app.rowconfigure(0, weight=1)
+
+login_frame.grid(row=0, column=0, sticky='news')
+main_frame.grid(row=0, column=0, sticky='news')
+
+login_frame.columnconfigure(0, weight=1)
+login_frame.rowconfigure(0, weight=1)
+
+login_frame.tkraise()
 def create_account():
     name = placeholderName.get().lower()
     lastname = placeholderLastName.get().lower()
@@ -10,24 +30,20 @@ def create_account():
         if not os.path.exists(user_path):
             os.makedirs(user_path)
         print(user_path) #TODO transition to main page
+        main_frame.tkraise()
 
 def connect_account(name, lastname):
-    print(f'{name}.{lastname}')
+    print(f'{name}.{lastname}') #TODO transition to main page
+    main_frame.tkraise()
 
-app = CTk()
-app.geometry('1200x800')
-app.title('Expenses Tracker')
-app.resizable(False, False)
+CreateAccountFrame = CTkFrame(login_frame)
+ListAccountFrame = CTkScrollableFrame(login_frame, orientation='vertical')
 
-CreateAccountFrame = CTkFrame(app)
-ListAccountFrame = CTkScrollableFrame(app, orientation='vertical')
-
-app.columnconfigure((0,1), weight=1)
-app.rowconfigure(0, weight=1)
+login_frame.columnconfigure((0,1), weight=1)
+login_frame.rowconfigure(0, weight=1)
 CreateAccountFrame.grid(row=0, column=0, sticky='nsew')
 ListAccountFrame.grid(row=0, column=1, sticky='nsew')
 
-#TODO color font white and black
 #Create Account Frame
 imgProfile = CTkImage(dark_image=Image.open('./Images/icon-create-account.png'), size=(100,100))
 profile = CTkLabel(CreateAccountFrame, image=imgProfile, text='').place(relx=0.5, rely=0.40, anchor='center')
