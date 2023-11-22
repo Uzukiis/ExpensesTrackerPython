@@ -1,10 +1,13 @@
 from customtkinter import *
 from PIL import Image
 import os
-import fonts
 import tkinter
 
+
+
 saldo=0
+
+
 
 app = CTk()
 app.geometry('1200x800')
@@ -28,12 +31,52 @@ main_frame.columnconfigure(1, weight=8)
 main_frame.rowconfigure((0,1,2,3,4,5,6,7), weight=1)
 
 #funkcje do zakładek
+
+#Budżet
 def budzetFunkcja():
     budzetFrame.tkraise()
     budzetbutton.configure(state="disabled")
     wydatkibutton.configure(state="normal")
     historiabutton.configure(state="normal")
     ustawieniabutton.configure(state="normal")
+def setBudget():
+    global notAValueText
+    global setValue_var
+    budgetwindow = CTkToplevel()
+    setBudgetLabel=CTkLabel(budgetwindow,
+             text = "Ustaw nowy budżet",
+             text_color=("#000000","#ffffff"),
+             font=("outfit",28),
+             fg_color=("#ebebeb","#242424"))
+    setBudgetLabel.pack()
+    newBudget = CTkEntry(budgetwindow, textvariable=setValue_var, placeholder_text=saldo)
+    newBudget.pack()
+    setValueButton = CTkButton(budgetwindow,
+                               text="Gotowe",
+                               text_color=("#ffffff"),
+                               font=("outfit", 28),
+                               fg_color=("#00A2E8"),
+                               hover_color="#0082C8",
+                               text_color_disabled="#00A2E8",
+                               command=setNewBudget)
+    setValueButton.pack()
+    notAValueText = CTkLabel(
+        budgetwindow,
+        text="Wpisana wartość musi być liczbą!",
+        text_color=("#ff5555"),
+        font=("outfit", 28),
+    )
+
+
+def setNewBudget():
+    try:
+        global saldo
+        saldo = setValue_var.get()  # odczytaj wartość z obiektu StringVar()
+        print(saldo)
+        saldoValue.configure(text=f"{saldo} zł")
+        currentBudgetValueText.configure(text=f"{saldo} zł")
+    except: notAValueText.pack()
+    finally: notAValueText.destroy
 def wydatkiFunkcja():
     wydatkiFrame.tkraise()
     budzetbutton.configure(state="normal")
@@ -54,10 +97,8 @@ def ustawieniaFunkcja():
     ustawieniabutton.configure(state="disabled")
 
 #inne funkcje
-def trybFunkcja():
-    global tryb
-    wybranyTryb = tryb.get()
-    print(tryb)
+
+    
 
 def create_account():
     name = placeholderName.get().lower()
@@ -72,14 +113,15 @@ def create_account():
 def connect_account(name, lastname):
     print(f'{name}.{lastname}') #TODO transition to main page
     main_frame.tkraise()
+    wydatkiFunkcja()
 
 
 #zakładki
-saldo=CTkLabel(main_frame,
+saldoValue=CTkLabel(main_frame,
                    text=f"{saldo}zł",
                    text_color=("#000000","#ffffff"),
                    font=("outfit",28))
-saldo.grid(row=0,column=0,sticky="nswe")
+saldoValue.grid(row=0,column=0,sticky="nswe")
 budzetbutton = CTkButton(main_frame,
                             text = "Budżet",
                             text_color=("#000000","#ffffff"),
@@ -127,8 +169,28 @@ wydatkitekst.pack()
 wydatkiFrame.grid(row=0,column=1,rowspan=8,sticky="nswe")
 
 budzetFrame = CTkFrame(main_frame)
-budzettekst=CTkLabel(budzetFrame, text="budzet text")
-budzettekst.pack()
+BudgetText=CTkLabel(budzetFrame, text="Obecny budżet: ",
+                    text_color=("#000000","#ffffff"),
+                    font=("outfit",28),
+                    fg_color=("#ebebeb","#242424"))
+currentBudgetValueText=CTkLabel(budzetFrame, text=saldo,
+                    text_color=("#000000","#ffffff"),
+                    font=("outfit",28),
+                    fg_color=("#ebebeb","#242424"))
+setBudgetButton = CTkButton(budzetFrame,
+                            text = "Ustaw budżet",
+                            text_color=("#ffffff"),
+                            font=("outfit",28),
+                            fg_color=("#00A2E8"),
+                            hover_color="#0082C8",
+                            text_color_disabled="#00A2E8",
+                            command=setBudget)
+setValue_var = tkinter.IntVar()
+
+BudgetText.pack()
+currentBudgetValueText.pack()
+setBudgetButton.pack()
+tryb = tkinter.StringVar(value=0)
 budzetFrame.grid(row=0,column=1,rowspan=8,sticky="nswe")
 
 historiaFrame = CTkFrame(main_frame)
@@ -141,7 +203,7 @@ ustawieniatekst=CTkLabel(ustawieniaFrame, text="Ustaw tryb aplikacji")
 ustawieniatekst.pack()
 
 
-tryb = tkinter.IntVar(value=0)
+
 sysmode = CTkRadioButton(ustawieniaFrame, text="Taki jak system",
                                              command = lambda: set_appearance_mode("system"), variable= tryb, value=1)
 lightmode = CTkRadioButton(ustawieniaFrame, text="Tryb jasny",
@@ -183,8 +245,5 @@ def check_account():
         CTkButton(ListAccountFrame, height=80, text=f'{n[0].capitalize()} {n[1].capitalize()}', command=lambda name=n[0], lastname=n[1]: connect_account(name, lastname), font=('Helvetica', 24)).pack(pady=10, fill='x')
 
 check_account()
-
-app.mainloop()
-
 
 app.mainloop()
