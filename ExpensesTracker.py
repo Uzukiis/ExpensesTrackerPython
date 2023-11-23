@@ -1,3 +1,4 @@
+import shutil
 from customtkinter import *
 from PIL import Image
 import os
@@ -64,7 +65,6 @@ def set_new_budget(): #Program budget
         saldoValue.configure(text=f'{calkowite_saldo} zł')
         currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
 
-        # TODO save data
         month = datetime.now().month
         year = datetime.now().year
         main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', f'{month}.{year}')
@@ -182,7 +182,6 @@ setValue_var = tkinter.IntVar()
 setString_var = tkinter.StringVar()
 
 currentBudgetValueText.pack()
-tryb = tkinter.StringVar(value=0)
 budzetFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
 historiaFrame = CTkFrame(main_frame)
@@ -190,10 +189,40 @@ CTkLabel(historiaFrame, text='historia text').pack()
 historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
 ustawieniaFrame = CTkFrame(main_frame)
-CTkLabel(ustawieniaFrame, text='Ustaw tryb aplikacji').pack()
-CTkRadioButton(ustawieniaFrame, text='Taki jak system', command=lambda: set_appearance_mode('system'), variable=tryb, value=1).pack()
-CTkRadioButton(ustawieniaFrame, text='Tryb jasny', command=lambda: set_appearance_mode('light'), variable=tryb, value=2).pack()
-CTkRadioButton(ustawieniaFrame, text='Tryb ciemny', command=lambda: set_appearance_mode('dark'), variable=tryb, value=3).pack()
 ustawieniaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
+
+trybFrame = CTkFrame(ustawieniaFrame)
+trybFrame.pack(fill='x', pady=10, ipady=100)
+CTkLabel(trybFrame, text='Ustaw tryb aplikacji').pack()
+def changeTheme(value):
+    match value:
+        case 'Systemowy':
+            set_appearance_mode('system')
+        case 'Jasny':
+            set_appearance_mode('light')
+        case 'Ciemny':
+            set_appearance_mode('dark')
+optionmenu_var = StringVar(value='Systemowy')
+Opcja = CTkOptionMenu(trybFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
+
+def deleteAccount():
+    main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}')
+    shutil.rmtree(main_path)
+    sys.exit()
+
+def deleteApplication():
+    main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker')
+    shutil.rmtree(main_path)
+    sys.exit()
+
+def ExitApplication():
+    sys.exit()
+
+kontoFrame = CTkFrame(ustawieniaFrame)
+kontoFrame.pack(fill='x', ipady=100)
+CTkLabel(kontoFrame, text='Inne ustawienia').pack()
+CTkButton(kontoFrame, text='Usuń konto', command=deleteAccount).pack(pady=20)
+CTkButton(kontoFrame, text='Usuń wszystkie dane z aplikacji', command=deleteApplication).pack(pady=20)
+CTkButton(kontoFrame, text='Wyłącz aplikacje', command=ExitApplication).pack(pady=40)
 
 app.mainloop()
