@@ -63,14 +63,24 @@ def set_new_budget(): #Program budget
         budgetwindow.destroy()
         saldoValue.configure(text=f'{calkowite_saldo} zł')
         currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
-        year = datetime.now().year
+
+        # TODO save data
         month = datetime.now().month
-        day = datetime.now().day
-        main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', f'{year}.{month}.{day}')
+        year = datetime.now().year
+        main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', f'{month}.{year}')
         zadanie = setString_var.get()
+
         if not os.path.exists(main_path):
             os.makedirs(main_path)
-        file_path = os.path.join(main_path, f'Zadanie.txt')
+            max_idFiles = 0
+        else:
+            files = os.listdir(main_path)
+            print(f'Pliki: {files}')
+            max_idFiles = len(files)
+            print(f'Max id: {max_idFiles}')
+
+        max_idFiles = max_idFiles + 1
+        file_path = os.path.join(main_path, f'{max_idFiles}.txt')
         with open(file_path,'w') as file:
             file.write(f'{zadanie};{setValue_var.get()}')
         with open(os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'calkowite_saldo', 'saldo.txt'), 'w') as file:
@@ -80,7 +90,7 @@ def changeButton(funkcja): #Funkcje do zakladek
     frameFunkcji = [budzetFrame, wydatkiFrame, historiaFrame, ustawieniaFrame]
     button = [budzetbutton, wydatkibutton, historiabutton, ustawieniabutton]
     frameFunkcji[funkcja].tkraise()
-    active_button = {'text_color': '#00A2E8','hover_color': ('#ebebeb', '#242424')}
+    active_button = {'text_color': '#00A2E8', 'hover_color': ('#ebebeb', '#242424')}
     deactive_button = {'text_color': ('#000000', '#ffffff'), 'hover_color': '#00A2E8'}
     for x in frameFunkcji:
         if x == frameFunkcji:
