@@ -23,6 +23,8 @@ main_frame.rowconfigure((0, 1, 2, 3, 4, 5, 6, 7), weight=1)
 login_frame.tkraise()
 
 calkowite_saldo = 0
+zmianaBudzetu = ""
+zmianaBudzetuText = ""
 imie = ''
 nazwisko = ''
 max_idFiles = 0
@@ -41,6 +43,31 @@ def checkfile():
                 currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
         except Exception:
             print('ERROR #1')
+
+
+def change_budget():
+    global zmianaBudzetu
+    global zmianaBudzetuText
+    zmianaBudzetu = "ustaw"
+    zmianaBudzetuText = "Ustaw nowy budżet"
+    set_budget()
+
+
+def add_budget():
+    global zmianaBudzetu
+    global zmianaBudzetuText
+    zmianaBudzetu = "dodaj"
+    zmianaBudzetuText = "Dodaj budżet"
+    set_budget()
+
+
+def subtract_budget():
+    global zmianaBudzetu
+    global zmianaBudzetuText
+    zmianaBudzetu = "odejmij"
+    zmianaBudzetuText = "Odejmij budżet"
+    set_budget()
+
 def set_budget(): #Window budget
     global setValue_var
     global setString_var
@@ -49,22 +76,27 @@ def set_budget(): #Window budget
     budgetwindow = CTkToplevel()
     budgetwindow.geometry('500x300')
     budgetwindow.resizable(width=False, height=False)
-    CTkLabel(budgetwindow, text='Ustaw nowy budżet', text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=20)
+    CTkLabel(budgetwindow, text=zmianaBudzetuText, text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=20)
     CTkEntry(budgetwindow, textvariable=setValue_var, placeholder_text=0).pack() #TODO po skonczeniu wyczyść tekst użytkownika do wartości początkowej 0
-    CTkEntry(budgetwindow, textvariable=setString_var, placeholder_text='Zadanie').pack() #TODO po skonczeniu wyczyść tekst użytkownika
     CTkButton(budgetwindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command=set_new_budget).pack(pady=20)
 
 def set_new_budget(): #Program budget
     global calkowite_saldo
+    global currentBudgetValueText
+    global zmianaBudzetu
     try:
-        calkowite_saldo += setValue_var.get()  #Odczytaj wartość z obiektu StringVar()
+        if zmianaBudzetu == "ustaw":
+            calkowite_saldo = setValue_var.get()  # Odczytaj wartość z obiektu StringVar()
+        elif zmianaBudzetu == "dodaj":
+            calkowite_saldo += setValue_var.get()  # Odczytaj wartość z obiektu StringVar()
+        elif zmianaBudzetu == "odejmij":
+            calkowite_saldo -= setValue_var.get()  # Odczytaj wartość z obiektu StringVar()
     except Exception:
         CTkLabel(budgetwindow, text='Wpisana wartość musi być liczbą!', text_color='#ff5555', font=('outfit', 28)).pack()
     else:
-        budgetwindow.destroy()
         saldoValue.configure(text=f'{calkowite_saldo} zł')
         currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
-
+        budgetwindow.destroy()
         month = datetime.now().month
         year = datetime.now().year
         main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', f'{month}.{year}')
@@ -175,14 +207,24 @@ CTkLabel(wydatkiFrame, text='wydatki text').pack()
 wydatkiFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
 budzetFrame = CTkFrame(main_frame)
-CTkLabel(budzetFrame, text='Obecny budżet: ', text_color=('#000000', '#ffffff'), font=('outfit', 28)).pack(pady=100)
+(CTkLabel(budzetFrame,
+        text='Obecny budżet: ',
+        text_color=('#000000', '#ffffff'),
+        font=('outfit', 28)
+          ).grid(row=1, column=1, sticky='nswe'))
 currentBudgetValueText = CTkLabel(budzetFrame, text=f'{calkowite_saldo} zł', text_color=('#000000', '#ffffff'), font=('outfit', 28))
-CTkButton(budzetFrame, text='Ustaw budżet', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command=set_budget).pack(pady=100)
+CTkButton(budzetFrame, text='Ustaw nowy budżet', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=change_budget).grid(row=3, column=1)
 setValue_var = tkinter.IntVar()
 setString_var = tkinter.StringVar()
+CTkButton(budzetFrame, text="-", text_color='#ffffff', font=('outfit', 28), fg_color='#aa3333', hover_color='#991111',command=subtract_budget).grid(row=3, column=0, sticky="e")
+CTkButton(budzetFrame, text="+", text_color='#ffffff', font=('outfit', 28), fg_color='#33aa33', hover_color='#118811',command=add_budget).grid(row=3, column=2, sticky="w")
+currentBudgetValueText.grid(row=2, column=1)
 
-currentBudgetValueText.pack()
 budzetFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
+budzetFrame.columnconfigure((0,1,2),weight=1)
+budzetFrame.rowconfigure((0,1,2,3,4,5,6),weight=1)
+
+
 
 historiaFrame = CTkFrame(main_frame)
 CTkLabel(historiaFrame, text='historia text').pack()
@@ -191,9 +233,7 @@ historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 ustawieniaFrame = CTkFrame(main_frame)
 ustawieniaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
-trybFrame = CTkFrame(ustawieniaFrame)
-trybFrame.pack(fill='x', pady=10, ipady=100)
-CTkLabel(trybFrame, text='Ustaw tryb aplikacji').pack()
+CTkLabel(ustawieniaFrame, text='Ustaw tryb aplikacji').pack()
 def changeTheme(value):
     match value:
         case 'Systemowy':
@@ -203,7 +243,7 @@ def changeTheme(value):
         case 'Ciemny':
             set_appearance_mode('dark')
 optionmenu_var = StringVar(value='Systemowy')
-Opcja = CTkOptionMenu(trybFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
+Opcja = CTkOptionMenu(ustawieniaFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
 
 def deleteAccount():
     main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}')
@@ -218,11 +258,9 @@ def deleteApplication():
 def ExitApplication():
     sys.exit()
 
-kontoFrame = CTkFrame(ustawieniaFrame)
-kontoFrame.pack(fill='x', ipady=100)
-CTkLabel(kontoFrame, text='Inne ustawienia').pack()
-CTkButton(kontoFrame, text='Usuń konto', command=deleteAccount).pack(pady=20)
-CTkButton(kontoFrame, text='Usuń wszystkie dane z aplikacji', command=deleteApplication).pack(pady=20)
-CTkButton(kontoFrame, text='Wyłącz aplikacje', command=ExitApplication).pack(pady=40)
+CTkLabel(ustawieniaFrame, text='Inne ustawienia').pack()
+CTkButton(ustawieniaFrame, text='Usuń konto', fg_color='#aa3333', hover_color='#991111', command=deleteAccount).pack(pady=20)
+CTkButton(ustawieniaFrame, text='Usuń wszystkie dane z aplikacji', fg_color='#aa3333', hover_color='#991111', command=deleteApplication).pack(pady=20)
+CTkButton(ustawieniaFrame, text='Wyłącz aplikacje', command=ExitApplication).pack(pady=40)
 
 app.mainloop()
