@@ -75,6 +75,8 @@ def set_budget(): #Window budget
     global calkowite_saldo
     budgetwindow = CTkToplevel()
     budgetwindow.geometry('500x300')
+    budgetwindow.attributes("-topmost", True)
+    budgetwindow.after(10, lambda: budgetwindow.focus_force())
     budgetwindow.resizable(width=False, height=False)
     CTkLabel(budgetwindow, text=zmianaBudzetuText, text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=20)
     CTkEntry(budgetwindow, textvariable=setValue_var, placeholder_text=0).pack() #TODO po skonczeniu wyczyść tekst użytkownika do wartości początkowej 0
@@ -234,6 +236,8 @@ ustawieniaFrame = CTkFrame(main_frame)
 ustawieniaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
 CTkLabel(ustawieniaFrame, text='Ustaw tryb aplikacji').pack()
+
+
 def changeTheme(value):
     match value:
         case 'Systemowy':
@@ -242,6 +246,8 @@ def changeTheme(value):
             set_appearance_mode('light')
         case 'Ciemny':
             set_appearance_mode('dark')
+
+
 optionmenu_var = StringVar(value='Systemowy')
 Opcja = CTkOptionMenu(ustawieniaFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
 
