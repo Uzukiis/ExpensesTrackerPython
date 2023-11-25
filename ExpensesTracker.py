@@ -35,6 +35,8 @@ def checkfile():
     file_path = os.path.join(main_path, 'saldo.txt')
     if not os.path.exists(main_path):
         os.makedirs(main_path)
+        with open(file_path, 'w') as file:
+            file.write('0')
     else:
         try:
             with open(file_path, 'r') as file:
@@ -44,33 +46,23 @@ def checkfile():
         except Exception:
             print('ERROR #1')
 
-
-def change_budget():
+def budget_operation(operation):
     global zmianaBudzetu
     global zmianaBudzetuText
-    zmianaBudzetu = "ustaw"
-    zmianaBudzetuText = "Ustaw nowy budżet"
-    set_budget()
-
-
-def add_budget():
-    global zmianaBudzetu
-    global zmianaBudzetuText
-    zmianaBudzetu = "dodaj"
-    zmianaBudzetuText = "Dodaj budżet"
-    set_budget()
-
-
-def subtract_budget():
-    global zmianaBudzetu
-    global zmianaBudzetuText
-    zmianaBudzetu = "odejmij"
-    zmianaBudzetuText = "Odejmij budżet"
+    match operation:
+        case 'ustawianie':
+            zmianaBudzetu = "ustaw"
+            zmianaBudzetuText = "Ustaw nowy budżet"
+        case 'dodawanie':
+            zmianaBudzetu = "dodaj"
+            zmianaBudzetuText = "Dodaj budżet"
+        case 'odejmowanie':
+            zmianaBudzetu = "odejmij"
+            zmianaBudzetuText = "Odejmij budżet"
     set_budget()
 
 def set_budget(): #Window budget
     global setValue_var
-    global setString_var
     global budgetwindow
     global calkowite_saldo
     budgetwindow = CTkToplevel()
@@ -81,11 +73,12 @@ def set_budget(): #Window budget
     CTkLabel(budgetwindow, text=zmianaBudzetuText, text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=20)
     CTkEntry(budgetwindow, textvariable=setValue_var, placeholder_text=0).pack() #TODO po skonczeniu wyczyść tekst użytkownika do wartości początkowej 0
     CTkButton(budgetwindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command=set_new_budget).pack(pady=20)
-
 def set_new_budget(): #Program budget
     global calkowite_saldo
     global currentBudgetValueText
     global zmianaBudzetu
+    history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','historia')
+
     try:
         if zmianaBudzetu == "ustaw":
             calkowite_saldo = setValue_var.get()  # Odczytaj wartość z obiektu StringVar()
@@ -99,30 +92,57 @@ def set_new_budget(): #Program budget
         saldoValue.configure(text=f'{calkowite_saldo} zł')
         currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
         budgetwindow.destroy()
+        day = datetime.now().day
         month = datetime.now().month
         year = datetime.now().year
-        main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', f'{month}.{year}')
-        zadanie = setString_var.get()
+        hour = datetime.now().hour
+        minute = datetime.now().minute
+        second = datetime.now().second
+        milisecond = datetime.now().microsecond // 1000
+        main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','saldo', f'{month}.{year}')
+        history_file_path = os.path.join(history_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
+        with open(history_file_path, 'w') as file:
+            file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}.{milisecond}/{zmianaBudzetu}')
+        if zmianaBudzetu != 'ustaw':
+            if not os.path.exists(main_path):
+                os.makedirs(main_path)
+                max_idFiles = 0
+            else:
+                files = os.listdir(main_path)
+                max_idFiles = len(files)
 
-        if not os.path.exists(main_path):
-            os.makedirs(main_path)
-            max_idFiles = 0
-        else:
-            files = os.listdir(main_path)
-            print(f'Pliki: {files}')
-            max_idFiles = len(files)
-            print(f'Max id: {max_idFiles}')
-
-        max_idFiles = max_idFiles + 1
-        file_path = os.path.join(main_path, f'{max_idFiles}.txt')
-        with open(file_path,'w') as file:
-            file.write(f'{zadanie};{setValue_var.get()}')
+            max_idFiles = max_idFiles + 1
+            file_path = os.path.join(main_path, f'{max_idFiles}.txt')
+            with open(file_path,'w') as file:
+                file.write(f'{zmianaBudzetu};{setValue_var.get()}')
         with open(os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'calkowite_saldo', 'saldo.txt'), 'w') as file:
             file.write(str(calkowite_saldo))
 
 def changeButton(funkcja): #Funkcje do zakladek
     frameFunkcji = [budzetFrame, wydatkiFrame, historiaFrame, ustawieniaFrame]
     button = [budzetbutton, wydatkibutton, historiabutton, ustawieniabutton]
+
+    # wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','wydatki')
+    history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','historia')
+
+    # if funkcja == 1:
+    #     if not os.path.exists(wydatki_path):
+    #         os.makedirs(wydatki_path)
+    if funkcja == 2:
+        if not os.path.exists(history_path):
+            os.makedirs(history_path)
+            CTkButton(ListHistoryFrame, text=f'Nic tu nie ma').grid(row=0, column=0)
+        else:
+            history = os.listdir(history_path)
+            n=0
+            for h in history:
+                with open(os.path.join(history_path, history[n]), 'r') as file: #TODO: history[h] nie działa, możesz się dowiedzieć dlaczego, zmienna n to tymczasowe rozwiązanie
+                    zawartosc = file.read()
+                    zawartosc = zawartosc.split('/')
+                    n += 1
+                    print(zawartosc[1])
+                    CTkButton(ListHistoryFrame, text=f'{zawartosc[1]}').grid(row=0, column=0)
+
     frameFunkcji[funkcja].tkraise()
     active_button = {'text_color': '#00A2E8', 'hover_color': ('#ebebeb', '#242424')}
     deactive_button = {'text_color': ('#000000', '#ffffff'), 'hover_color': '#00A2E8'}
@@ -215,28 +235,29 @@ budzetFrame = CTkFrame(main_frame)
         font=('outfit', 28)
           ).grid(row=1, column=1, sticky='nswe'))
 currentBudgetValueText = CTkLabel(budzetFrame, text=f'{calkowite_saldo} zł', text_color=('#000000', '#ffffff'), font=('outfit', 28))
-CTkButton(budzetFrame, text='Ustaw nowy budżet', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=change_budget).grid(row=3, column=1)
+CTkButton(budzetFrame, text='Ustaw nowy budżet', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=lambda: budget_operation('ustawianie')).grid(row=3, column=1)
 setValue_var = tkinter.IntVar()
-setString_var = tkinter.StringVar()
-CTkButton(budzetFrame, text="-", text_color='#ffffff', font=('outfit', 28), fg_color='#aa3333', hover_color='#991111',command=subtract_budget).grid(row=3, column=0, sticky="e")
-CTkButton(budzetFrame, text="+", text_color='#ffffff', font=('outfit', 28), fg_color='#33aa33', hover_color='#118811',command=add_budget).grid(row=3, column=2, sticky="w")
+CTkButton(budzetFrame, text="-", text_color='#ffffff', font=('outfit', 28), fg_color='#aa3333', hover_color='#991111',command=lambda: budget_operation('odejmowanie')).grid(row=3, column=0, sticky="e")
+CTkButton(budzetFrame, text="+", text_color='#ffffff', font=('outfit', 28), fg_color='#33aa33', hover_color='#118811',command=lambda: budget_operation('dodawanie')).grid(row=3, column=2, sticky="w")
 currentBudgetValueText.grid(row=2, column=1)
 
 budzetFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 budzetFrame.columnconfigure((0,1,2),weight=1)
 budzetFrame.rowconfigure((0,1,2,3,4,5,6),weight=1)
 
-
-
 historiaFrame = CTkFrame(main_frame)
-CTkLabel(historiaFrame, text='historia text').pack()
-historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
+
+# ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical', height=800).grid(row=0, column=1, sticky='nswe')
+historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe') #Do tego
+historiaFrame.columnconfigure(0, weight=1)
+historiaFrame.rowconfigure(0, weight=1)
+ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical').grid(row=0, column=0, sticky='nswe')
+# ListHistoryFrame = CTkScrollableFrame(Historialabel, orientation='vertical').pack()
 
 ustawieniaFrame = CTkFrame(main_frame)
 ustawieniaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 
 CTkLabel(ustawieniaFrame, text='Ustaw tryb aplikacji').pack()
-
 
 def changeTheme(value):
     match value:
@@ -246,7 +267,6 @@ def changeTheme(value):
             set_appearance_mode('light')
         case 'Ciemny':
             set_appearance_mode('dark')
-
 
 optionmenu_var = StringVar(value='Systemowy')
 Opcja = CTkOptionMenu(ustawieniaFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
@@ -261,12 +281,11 @@ def deleteApplication():
     shutil.rmtree(main_path)
     sys.exit()
 
-def ExitApplication():
+def exitApplication():
     sys.exit()
 
 CTkLabel(ustawieniaFrame, text='Inne ustawienia').pack()
 CTkButton(ustawieniaFrame, text='Usuń konto', fg_color='#aa3333', hover_color='#991111', command=deleteAccount).pack(pady=20)
 CTkButton(ustawieniaFrame, text='Usuń wszystkie dane z aplikacji', fg_color='#aa3333', hover_color='#991111', command=deleteApplication).pack(pady=20)
-CTkButton(ustawieniaFrame, text='Wyłącz aplikacje', command=ExitApplication).pack(pady=40)
-
+CTkButton(ustawieniaFrame, text='Wyłącz aplikacje', command=exitApplication).pack(pady=40)
 app.mainloop()
