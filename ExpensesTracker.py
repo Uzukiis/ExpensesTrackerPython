@@ -131,17 +131,18 @@ def changeButton(funkcja): #Funkcje do zakladek
     if funkcja == 2:
         if not os.path.exists(history_path):
             os.makedirs(history_path)
-            CTkButton(ListHistoryFrame, text=f'Nic tu nie ma').grid(row=0, column=0)
+            CTkButton(ListHistoryFrame, text=f'Nic tu nie ma').grid(row=1, column=1)
         else:
             history = os.listdir(history_path)
             n=0
             for h in history:
-                with open(os.path.join(history_path, history[n]), 'r') as file: #TODO: history[h] nie działa, możesz się dowiedzieć dlaczego, zmienna n to tymczasowe rozwiązanie
+                print(h)
+                with open(os.path.join(history_path, h), 'r') as file:
                     zawartosc = file.read()
                     zawartosc = zawartosc.split('/')
                     n += 1
                     print(zawartosc[1])
-                    CTkButton(ListHistoryFrame, text=f'{zawartosc[1]}').grid(row=0, column=0)
+                    CTkButton(ListHistoryFrame, text=f'{zawartosc[1]}').grid(row=1, column=1)
 
     frameFunkcji[funkcja].tkraise()
     active_button = {'text_color': '#00A2E8', 'hover_color': ('#ebebeb', '#242424')}
@@ -251,8 +252,10 @@ historiaFrame = CTkFrame(main_frame)
 historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe') #Do tego
 historiaFrame.columnconfigure(0, weight=1)
 historiaFrame.rowconfigure(0, weight=1)
-ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical').grid(row=0, column=0, sticky='nswe')
-# ListHistoryFrame = CTkScrollableFrame(Historialabel, orientation='vertical').pack()
+ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical', fg_color=("#CFCFCF", "#333333"))
+ListHistoryFrame.grid(sticky='nswe')
+ListHistoryFrame.columnconfigure((0,1,2),weight=1)
+CTkLabel(ListHistoryFrame,text="historia").grid(column=1)
 
 ustawieniaFrame = CTkFrame(main_frame)
 ustawieniaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
