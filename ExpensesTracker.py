@@ -122,12 +122,8 @@ def changeButton(funkcja): #Funkcje do zakladek
     frameFunkcji = [budzetFrame, wydatkiFrame, historiaFrame, ustawieniaFrame]
     button = [budzetbutton, wydatkibutton, historiabutton, ustawieniabutton]
 
-    # wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','wydatki')
     history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','historia')
 
-    # if funkcja == 1:
-    #     if not os.path.exists(wydatki_path):
-    #         os.makedirs(wydatki_path)
     if funkcja == 2:
         if not os.path.exists(history_path):
             os.makedirs(history_path)
@@ -135,15 +131,12 @@ def changeButton(funkcja): #Funkcje do zakladek
         else:
             history = os.listdir(history_path)
             n=0
-            for h in history:
-                print(h)
+            for h in reversed(history):
                 with open(os.path.join(history_path, h), 'r') as file:
                     zawartosc = file.read()
                     zawartosc = zawartosc.split('/')
-                    n += 1
-                    print(zawartosc[1])
-                    CTkButton(ListHistoryFrame, text=f'{zawartosc[1]}').grid(row=1, column=1)
-
+                    n+=1
+                    CTkButton(ListHistoryFrame, text=f'{zawartosc[0].capitalize()}                              {zawartosc[1].capitalize()}', font=('Helvetica', 24), height=60, width=600).grid(row=n, column=1, pady=10)
     frameFunkcji[funkcja].tkraise()
     active_button = {'text_color': '#00A2E8', 'hover_color': ('#ebebeb', '#242424')}
     deactive_button = {'text_color': ('#000000', '#ffffff'), 'hover_color': '#00A2E8'}
@@ -249,7 +242,7 @@ budzetFrame.rowconfigure((0,1,2,3,4,5,6),weight=1)
 historiaFrame = CTkFrame(main_frame)
 
 # ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical', height=800).grid(row=0, column=1, sticky='nswe')
-historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe') #Do tego
+historiaFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
 historiaFrame.columnconfigure(0, weight=1)
 historiaFrame.rowconfigure(0, weight=1)
 ListHistoryFrame = CTkScrollableFrame(historiaFrame, orientation='vertical', fg_color=("#CFCFCF", "#333333"))
