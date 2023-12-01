@@ -136,7 +136,7 @@ def changeButton(funkcja): #Funkcje do zakladek
                         zawartosc = file.read()
                         zawartosc = zawartosc.split('/')
                         n+=1
-                        CTkLabel(ListHistoryFrame, text=f'{zawartosc[0].capitalize()}                              {zawartosc[1].capitalize()}', font=('Helvetica', 24), height=60, width=600, fg_color='#00A2E8').grid(row=n, column=1, pady=10)
+                        CTkLabel(ListHistoryFrame, text=f'{zawartosc[0].capitalize()}                              {zawartosc[1].capitalize()}', font=('Helvetica', 24), height=60, width=600, fg_color=('#ebebeb', '#242424')).grid(row=n, column=1, pady=10)
             else:
                 CTkLabel(ListHistoryFrame, text=f'Nic tu nie ma', font=('Helvetica', 24), height=60, width=600, fg_color='#00A2E8').grid(row=1, column=1)
     frameFunkcji[funkcja].tkraise()
@@ -220,9 +220,35 @@ ustawieniabutton.grid(row=4, column=0, sticky='nswe')
 
 #prawa strona
 wydatkiFrame = CTkFrame(main_frame)
-CTkLabel(wydatkiFrame, text='wydatki text').pack()
-
 wydatkiFrame.grid(row=0, column=1, rowspan=8, sticky='nswe')
+wydatkiFrame.columnconfigure(0, weight=1)
+wydatkiFrame.rowconfigure(0, weight=1)
+listWydatkiFrame = CTkScrollableFrame(wydatkiFrame,orientation='vertical', fg_color=("#CFCFCF", "#333333"))
+listWydatkiFrame.grid(sticky='nswe')
+listWydatkiFrame.columnconfigure((0,1,2),weight=1)
+
+
+expenseNameVar = tkinter.StringVar()
+
+def add_new_expense():
+    expenseName=expenseNameVar
+    expensewindow.destroy()
+def nowy_wydatek():
+    global expensewindow
+    expensewindow = CTkToplevel()
+    expensewindow.geometry('500x350')
+    expensewindow.attributes("-topmost", True)
+    expensewindow.after(10, lambda: expensewindow.focus_force())
+    expensewindow.resizable(width=False, height=False)
+    CTkLabel(expensewindow, text="Dodaj wydatek", text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=30)
+    CTkLabel(expensewindow, text="Podaj koszt wydatku").pack(pady=10)
+    CTkEntry(expensewindow, textvariable=expenseNameVar, placeholder_text=0).pack()
+    CTkLabel(expensewindow,text="Wybierz kategorię").pack(pady=10)
+    CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka']).pack()
+    CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command=add_new_expense).pack(pady=20)
+
+
+CTkButton(listWydatkiFrame, text='Dodaj wydatek', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=nowy_wydatek).pack()
 
 budzetFrame = CTkFrame(main_frame)
 (CTkLabel(budzetFrame,
