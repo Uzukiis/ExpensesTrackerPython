@@ -123,6 +123,25 @@ def changeButton(funkcja): #Funkcje do zakladek
     button = [budzetbutton, wydatkibutton, historiabutton, ustawieniabutton]
 
     history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','historia')
+    wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','wydatki')
+
+    if funkcja == 1:
+        if not os.path.exists(wydatki_path):
+            os.makedirs(wydatki_path)
+        else:
+            wydatki = os.listdir(wydatki_path)
+            n=0
+            if len(wydatki) != 0:
+                for h in reversed(wydatki):
+                    with open(os.path.join(wydatki_path, h), 'r') as file:
+                        zawartosc = file.read()
+                        zawartosc = zawartosc.split('/')
+                        n+=1
+                        #TODO: frame do zmiany
+
+            #             CTkLabel(ListHistoryFrame, text=f'{zawartosc[0].capitalize()}             {zawartosc[1].capitalize()}            {zawartosc[2].capitalize()}', font=('Helvetica', 24), height=60, width=600, fg_color=('#ebebeb', '#242424')).grid(row=n, column=1, pady=10)
+            # else:
+            #     CTkLabel(ListHistoryFrame, text=f'Nic tu nie ma', font=('Helvetica', 24), height=60, width=600, fg_color='#00A2E8').grid(row=1, column=1)
 
     if funkcja == 2:
         if not os.path.exists(history_path):
@@ -230,22 +249,40 @@ listWydatkiFrame.columnconfigure((0,1,2),weight=1)
 
 expenseNameVar = tkinter.StringVar()
 
-def add_new_expense():
+def add_new_expense(wybor, koszt):
+    global opcja
+    global koszt_wydatku
     expenseName=expenseNameVar
+    print(koszt)
+    wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'wydatki')
+    day = datetime.now().day
+    month = datetime.now().month
+    year = datetime.now().year
+    hour = datetime.now().hour
+    minute = datetime.now().minute
+    second = datetime.now().second
+    milisecond = datetime.now().microsecond // 1000
+    wydatki_file_path = os.path.join(wydatki_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
+
+    with open(wydatki_file_path, 'w') as file:
+        file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}.{milisecond}/{opcja}/{koszt_wydatku}')
+
     expensewindow.destroy()
 def nowy_wydatek():
     global expensewindow
+    global opcja
+    global koszt_wydatku
     expensewindow = CTkToplevel()
     expensewindow.geometry('500x350')
     expensewindow.attributes("-topmost", True)
     expensewindow.after(10, lambda: expensewindow.focus_force())
     expensewindow.resizable(width=False, height=False)
     CTkLabel(expensewindow, text="Dodaj wydatek", text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=30)
-    CTkLabel(expensewindow, text="Podaj koszt wydatku").pack(pady=10)
+    koszt_wydatku = CTkLabel(expensewindow, text="Podaj koszt wydatku").pack(pady=10)
     CTkEntry(expensewindow, textvariable=expenseNameVar, placeholder_text=0).pack()
     CTkLabel(expensewindow,text="Wybierz kategorię").pack(pady=10)
-    CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka']).pack()
-    CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command=add_new_expense).pack(pady=20)
+    opcja = CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka']).pack()
+    CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command= lambda: add_new_expense(opcja, koszt_wydatku)).pack(pady=20)
 
 
 CTkButton(listWydatkiFrame, text='Dodaj wydatek', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=nowy_wydatek).pack()
