@@ -102,7 +102,7 @@ def set_new_budget(): #Program budget
         main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','saldo', f'{month}.{year}')
         history_file_path = os.path.join(history_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
         with open(history_file_path, 'w') as file:
-            file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}.{milisecond}/{zmianaBudzetu}')
+            file.write(f'{year}.{month}.{day} {hour}.{minute}/{zmianaBudzetu}')
         if zmianaBudzetu != 'ustaw':
             if not os.path.exists(main_path):
                 os.makedirs(main_path)
@@ -185,11 +185,12 @@ def create_account():
 def connect_account(name, lastname):
     global imie
     global nazwisko
-    imie=name
-    nazwisko=lastname
+    imie = name
+    nazwisko = lastname
     checkfile()
     main_frame.tkraise()
     changeButton(1)
+
 
 CreateAccountFrame = CTkFrame(login_frame)
 ListAccountFrame = CTkScrollableFrame(login_frame, orientation='vertical')
@@ -208,6 +209,7 @@ placeholderLastName = CTkEntry(CreateAccountFrame, placeholder_text='Nazwisko', 
 placeholderLastName.place(relx=0.5, rely=0.55, anchor='center')
 CTkButton(CreateAccountFrame, text='Create Account', corner_radius=15, width=150, height=30, command=create_account).place(relx=0.5, rely=0.62, anchor='center')
 
+
 def check_account():
     main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker')
     if not os.path.exists(main_path):
@@ -217,6 +219,7 @@ def check_account():
     for x in users:
         n = x.split('.')
         CTkButton(ListAccountFrame, height=80, text=f'{n[0].capitalize()} {n[1].capitalize()}', command=lambda name=n[0], lastname=n[1]: connect_account(name, lastname), font=('Helvetica', 24)).pack(pady=10, fill='x')
+
 
 check_account()
 
@@ -247,13 +250,12 @@ listWydatkiFrame.grid(sticky='nswe')
 listWydatkiFrame.columnconfigure((0,1,2),weight=1)
 
 
-expenseNameVar = tkinter.StringVar()
+expenseCostVar = tkinter.StringVar()
 
-def add_new_expense(wybor, koszt):
-    global opcja
-    global koszt_wydatku
-    expenseName=expenseNameVar
+def add_new_expense(kategoria, koszt):
+    global calkowite_saldo
     print(koszt)
+    print(kategoria)
     wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'wydatki')
     day = datetime.now().day
     month = datetime.now().month
@@ -264,8 +266,13 @@ def add_new_expense(wybor, koszt):
     milisecond = datetime.now().microsecond // 1000
     wydatki_file_path = os.path.join(wydatki_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
 
+    koszt = int(koszt)
+    calkowite_saldo -= koszt
+    saldoValue.configure(text=f'{calkowite_saldo} zł')
+    currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
+
     with open(wydatki_file_path, 'w') as file:
-        file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}.{milisecond}/{opcja}/{koszt_wydatku}')
+        file.write(f'{year}.{month}.{day} {hour}.{minute}/{kategoria}/{koszt}')
 
     expensewindow.destroy()
 def nowy_wydatek():
@@ -279,10 +286,11 @@ def nowy_wydatek():
     expensewindow.resizable(width=False, height=False)
     CTkLabel(expensewindow, text="Dodaj wydatek", text_color=('#000000', '#ffffff'), font=('outfit', 28), fg_color=('#ebebeb', '#242424')).pack(pady=30)
     koszt_wydatku = CTkLabel(expensewindow, text="Podaj koszt wydatku").pack(pady=10)
-    CTkEntry(expensewindow, textvariable=expenseNameVar, placeholder_text=0).pack()
+    CTkEntry(expensewindow, textvariable=expenseCostVar, placeholder_text=0).pack()
     CTkLabel(expensewindow,text="Wybierz kategorię").pack(pady=10)
-    opcja = CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka']).pack()
-    CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command= lambda: add_new_expense(opcja, koszt_wydatku)).pack(pady=20)
+    expenseCategory_Var = StringVar()
+    opcja = CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka'], variable = expenseCategory_Var,).pack()
+    CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command= lambda: add_new_expense(expenseCategory_Var.get(), expenseCostVar.get())).pack(pady=20)
 
 
 CTkButton(listWydatkiFrame, text='Dodaj wydatek', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=nowy_wydatek).pack()
@@ -327,7 +335,7 @@ def changeTheme(value):
             set_appearance_mode('dark')
 
 optionmenu_var = StringVar(value='Systemowy')
-Opcja = CTkOptionMenu(ustawieniaFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
+CTkOptionMenu(ustawieniaFrame, values=['Systemowy', 'Jasny', 'Ciemny'], command=lambda value=optionmenu_var.get(): changeTheme(value), variable=optionmenu_var).pack()
 
 def deleteAccount():
     main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}')
