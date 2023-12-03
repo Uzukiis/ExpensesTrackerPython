@@ -256,6 +256,7 @@ def add_new_expense(kategoria, koszt):
     global calkowite_saldo
     print(koszt)
     print(kategoria)
+    history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'historia')
     wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'wydatki')
     day = datetime.now().day
     month = datetime.now().month
@@ -264,6 +265,7 @@ def add_new_expense(kategoria, koszt):
     minute = datetime.now().minute
     second = datetime.now().second
     milisecond = datetime.now().microsecond // 1000
+    main_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'saldo',f'{month}.{year}')
     wydatki_file_path = os.path.join(wydatki_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
 
     koszt = int(koszt)
@@ -271,8 +273,15 @@ def add_new_expense(kategoria, koszt):
     saldoValue.configure(text=f'{calkowite_saldo} zł')
     currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
 
+    history_file_path = os.path.join(history_path, f'{year}.{month}.{day}_{hour}.{minute}.{second}.{milisecond}.txt')
+    with open(history_file_path, 'w') as file:
+        file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}/ - {koszt}\n                                                     {kategoria}')
+
     with open(wydatki_file_path, 'w') as file:
-        file.write(f'{year}.{month}.{day} {hour}.{minute}/{kategoria}/{koszt}')
+        file.write(f'{year}.{month}.{day} {hour}.{minute}.{second}/{kategoria}/{koszt}')
+
+    with open(os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'calkowite_saldo', 'saldo.txt'), 'w') as file:
+        file.write(str(calkowite_saldo))
 
     expensewindow.destroy()
 def nowy_wydatek():
@@ -291,7 +300,6 @@ def nowy_wydatek():
     expenseCategory_Var = StringVar()
     opcja = CTkOptionMenu(expensewindow, values=['Zakupy', 'Podróż', 'Rozrywka'], variable = expenseCategory_Var,).pack()
     CTkButton(expensewindow, text='Gotowe', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', command= lambda: add_new_expense(expenseCategory_Var.get(), expenseCostVar.get())).pack(pady=20)
-
 
 CTkButton(listWydatkiFrame, text='Dodaj wydatek', text_color='#ffffff', font=('outfit', 28), fg_color='#00A2E8', hover_color='#0082C8', text_color_disabled='#00A2E8', width=300, command=nowy_wydatek).pack()
 
