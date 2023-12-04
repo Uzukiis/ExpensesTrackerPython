@@ -4,6 +4,8 @@ from PIL import Image
 import os
 import tkinter
 from datetime import datetime
+import atexit
+
 app = CTk()
 app.geometry('1200x800')
 app.title('Expenses Tracker')
@@ -43,9 +45,21 @@ def checkfile():
                 calkowite_saldo = int(file.read())
                 saldoValue.configure(text=f'{calkowite_saldo} zł')
                 currentBudgetValueText.configure(text=f'{calkowite_saldo} zł')
-        except Exception:
-            print('ERROR #1')
+                expenses_file_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker',
+                                                  f'{imie}.{nazwisko}', 'expenses.txt')
+                if os.path.exists(expenses_file_path):
+                    with open(expenses_file_path, 'r') as expenses_file:
+                        expenses_data = expenses_file.readlines()
 
+
+        except Exception:
+            print("ERROR")
+
+
+    for expense_text in expenses_data:
+        new_label = CTkLabel(listWydatkiFrame, text=expense_text, font=('Helvetica', 16),
+                                         fg_color=('#ebebeb', '#242424'),width=400, height=50)
+        new_label.pack(pady=10)
 def budget_operation(operation):
     global zmianaBudzetu
     global zmianaBudzetuText
@@ -124,6 +138,10 @@ def changeButton(funkcja): #Funkcje do zakladek
 
     history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','historia')
     wydatki_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}','wydatki')
+
+    if funkcja == 0:
+        if not os.path.exists(history_path):
+            os.makedirs(history_path)
 
     if funkcja == 1:
         if not os.path.exists(wydatki_path):
@@ -252,8 +270,14 @@ listWydatkiFrame.columnconfigure((0,1,2),weight=1)
 
 expenseCostVar = tkinter.StringVar()
 
+def save_expenses_to_file(expense_text):
+    expenses_file_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'expenses.txt')
+    with open(expenses_file_path, 'a') as file:
+        file.write(expense_text + '\n')
+
 def add_new_expense(kategoria, koszt):
     global calkowite_saldo
+    global wydatekTekst
     print(koszt)
     print(kategoria)
     history_path = os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'historia')
@@ -282,6 +306,13 @@ def add_new_expense(kategoria, koszt):
 
     with open(os.path.join(os.path.expanduser('~'), 'Documents', 'Expenses_Tracker', f'{imie}.{nazwisko}', 'calkowite_saldo', 'saldo.txt'), 'w') as file:
         file.write(str(calkowite_saldo))
+
+    wydatekTekst = f'{year}.{month}.{day} {hour}.{minute}.{second} - Kategoria: {kategoria}, Koszt: {koszt} zł'
+    new_label = CTkLabel(listWydatkiFrame,
+                         text=wydatekTekst,
+                         font=('Helvetica', 16), fg_color=('#ebebeb', '#242424'),width=400, height=50)
+    new_label.pack(pady=10)
+    save_expenses_to_file(f"{year}.{month}.{day} {hour}.{minute}.{second} - Kategoria: {kategoria}, Koszt: {koszt} zł")
 
     expensewindow.destroy()
 def nowy_wydatek():
@@ -363,3 +394,9 @@ CTkButton(ustawieniaFrame, text='Usuń konto', fg_color='#aa3333', hover_color='
 CTkButton(ustawieniaFrame, text='Usuń wszystkie dane z aplikacji', fg_color='#aa3333', hover_color='#991111', command=deleteApplication).pack(pady=20)
 CTkButton(ustawieniaFrame, text='Wyłącz aplikacje', command=exitApplication).pack(pady=40)
 app.mainloop()
+
+def save_expenses_at_exit():
+    def subfunc():
+        save_expenses_to_file(wydatekTekst)
+
+    atexit.register(subfunc)
